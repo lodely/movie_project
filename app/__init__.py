@@ -3,7 +3,7 @@
 
 from flask import Flask, render_template
 
-from flask_sqlalchemy import SQLAlchemy
+from app.models import db
 
 app = Flask(__name__)
 app.debug = True
@@ -13,7 +13,8 @@ app.config["SQLALCHEMY_DATABASE_URI"] = 'mysql+cymysql://root:root@localhost:330
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = '205YWHhaG0ASHGghaoghaQA0TGAHLHG'
 
-db = SQLAlchemy(app)
+db.init_app(app)
+db.create_all(app=app)
 
 from app.admin import admin as admin_blueprint
 from app.home import home as home_blueprint

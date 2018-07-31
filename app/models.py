@@ -1,15 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 from datetime import datetime
-from app import db
 
+from flask_sqlalchemy import SQLAlchemy as _SQLAlchemy
+from contextlib import contextmanager
 
-# from flask_sqlalchemy import SQLAlchemy
-# from flask import Flask
-# app = Flask(__name__)
-# app.config["SQLALCHEMY_DATABASE_URI"] = 'mysql+cymysql://root:root@localhost:3306/movie_project'
-# app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-# db = SQLAlchemy(app)
+# 提交数据，若出错自动回滚
+class SQLAlchemy(_SQLAlchemy):
+    @contextmanager
+    def auto_commit(self):
+        try:
+            yield
+            self.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+db = SQLAlchemy()
 
 # 会员模型
 class Users(db.Model):
@@ -51,6 +58,12 @@ class Tags(db.Model):
 
     def __repr__(self):
         return '<Tags %r>' % self.name
+
+    @classmethod
+    def get_all_tags(cls, page):
+        # 每页查询10条
+        tags = Tags.query.paginate(page=page, per_page=10)
+        return tags
 
 # 电影
 class Movie(db.Model):
