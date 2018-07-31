@@ -1,18 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-import datetime
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-# from . import app
 from datetime import datetime
+from app import db
 
-app = Flask(__name__)
 
-# 配置连接的数据库
-app.config["SQLALCHEMY_DATABASE_URI"] = 'mysql+cymysql://root:root@localhost:3306/movie_project'
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-db = SQLAlchemy(app)
+# from flask_sqlalchemy import SQLAlchemy
+# from flask import Flask
+# app = Flask(__name__)
+# app.config["SQLALCHEMY_DATABASE_URI"] = 'mysql+cymysql://root:root@localhost:3306/movie_project'
+# app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+# db = SQLAlchemy(app)
 
 # 会员模型
 class Users(db.Model):
@@ -31,7 +28,7 @@ class Users(db.Model):
     moviecols = db.relationship("Moviecol", backref='user')   #收藏外键关联
 
     def __repr__(self):
-        return '<User %r>' % self.nickname
+        return '<Users %r>' % self.nickname
 
 # 会员登录日志
 class UserLog(db.Model):
@@ -149,6 +146,18 @@ class Admin(db.Model):
     def __repr__(self):
         return '<Admin %r>' % self.name
 
+    def check_pwd(self, pwd):
+    #     # 验证密码
+    #     from werkzeug.security import check_password_hash
+    #     # 相同返回True，不同返回False
+    #     return check_password_hash(self.pwd, pwd)
+        if self.pwd == pwd:
+            return True
+        else:
+            return False
+
+
+
 # 管理员登录日志模型
 class AdminLog(db.Model):
     __tablename__ = 'adminlog'
@@ -172,8 +181,9 @@ class OpLog(db.Model):
     def __repr__(self):
         return '<OpLog %r>' % self.id
 
-if __name__ == "__main__":
-    # db.create_all()
-    role = Role(name='超级管理员', auths="")
-    db.session.add(role)
-    db.session.commit()
+# if __name__ == "__main__":
+#     # db.drop_all()
+#     # db.create_all()
+#     admin = Admin(name='admin', pwd="adminadmin", is_super=0, role_id=1)
+#     db.session.add(admin)
+#     db.session.commit()
