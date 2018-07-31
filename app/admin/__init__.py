@@ -4,6 +4,6 @@
 from flask import Blueprint
 
 # 创建蓝图对象
-admin = Blueprint("amdin", __name__)
+admin = Blueprint("admin", __name__)
 
 import app.admin.views
