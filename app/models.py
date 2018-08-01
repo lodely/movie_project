@@ -4,6 +4,7 @@ from datetime import datetime
 
 from flask_sqlalchemy import SQLAlchemy as _SQLAlchemy
 from contextlib import contextmanager
+from flask import flash
 
 from . import app
 
@@ -14,9 +15,11 @@ class SQLAlchemy(_SQLAlchemy):
         try:
             yield
             self.session.commit()
+            flash("数据库保存", "ok")
         except Exception as e:
             db.session.rollback()
-            print('数据库操作失败')
+            flash("数据库保存", "err")
+            raise e
 
 db = SQLAlchemy(app)
 
@@ -120,6 +123,12 @@ class Preview(db.Model):
 
     def __repr__(self):
         return '<Preview %r>' % self.title
+
+    @classmethod
+    def get_ten_previews(cls, page):
+        # 每页查询10条
+        previews = Preview.query.paginate(page=page, per_page=10)
+        return previews
 
 # 评论
 class Comment(db.Model):

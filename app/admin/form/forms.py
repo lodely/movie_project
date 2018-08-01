@@ -109,7 +109,7 @@ class MovieForm(FlaskForm):
         validators=[DataRequired("请选择需要上传的封面!")],
         description="封面",
         render_kw={
-            "id" : "input_url",
+            "id" : "input_logo",
             "placeholder" : "选择文件"
         }
     )
@@ -273,6 +273,34 @@ class EditMovieForm(FlaskForm):
     )
     submit = SubmitField(
         "提交",
+        render_kw={
+            "class" : "btn btn-primary"
+        }
+    )
+
+# 添加预告
+class PreviewForm(FlaskForm):
+    title = StringField(
+        "预告标题",
+        validators=[DataRequired("请输入预告标题！")],
+        description="预告标题",
+        render_kw={
+            "class" : "form-control",
+            "id" : "input_title",
+            "placeholder" : "请输入预告标题！"
+        }
+    )
+    logo = FileField(
+        "预告封面",
+        validators=[DataRequired("请选择需要上传的封面!")],
+        description="预告封面",
+        render_kw={
+            "id" : "input_logo",
+            "placeholder" : "选择文件"
+        }
+    )
+    submit = SubmitField(
+        "添加",
         render_kw={
             "class" : "btn btn-primary"
         }
