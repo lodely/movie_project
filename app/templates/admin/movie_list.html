@@ -66,7 +66,7 @@
                             <td>{{ movie.commentnum }}</td>
                             <td>{{ movie.addtime }}</td>
                             <td>
-                                <a href="#" class="label label-success">编辑</a>
+                                <a href="{{ url_for('admin.movie_edit', id=movie.id) }}" class="label label-success">编辑</a>
                                 &nbsp;
                                 <a href="{{ url_for('admin.movie_del', id=movie.id) }}" class="label label-danger">删除</a>
                             </td>
