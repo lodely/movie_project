@@ -2,8 +2,8 @@
 # -*- coding: UTF-8 -*-
 
 from flask import Flask, render_template
-
-from app.models import db
+import os
+# from app.models import db
 
 app = Flask(__name__)
 app.debug = True
@@ -11,10 +11,13 @@ app.debug = True
 # 配置连接的数据库
 app.config["SQLALCHEMY_DATABASE_URI"] = 'mysql+cymysql://root:root@localhost:3306/movie_project'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SECRET_KEY"] = '205YWHhaG0ASHGghaoghaQA0TGAHLHG'
 
-db.init_app(app)
-db.create_all(app=app)
+app.config["SECRET_KEY"] = '205YWHhaG0ASHGghaoghaQA0TGAHLHG'
+app.config["UP_DIR"] = os.path.join(os.path.abspath(os.path.dirname(__file__)), "static/uploads/")
+
+"""使用该方法导入app只能在视图函数中使用数据库模型"""
+# db.init_app(app)
+# db.create_all(app=app)
 
 from app.admin import admin as admin_blueprint
 from app.home import home as home_blueprint

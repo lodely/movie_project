@@ -5,6 +5,8 @@ from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy as _SQLAlchemy
 from contextlib import contextmanager
 
+from . import app
+
 # 提交数据，若出错自动回滚
 class SQLAlchemy(_SQLAlchemy):
     @contextmanager
@@ -14,9 +16,9 @@ class SQLAlchemy(_SQLAlchemy):
             self.session.commit()
         except Exception as e:
             db.session.rollback()
-            raise e
+            print('数据库操作失败')
 
-db = SQLAlchemy()
+db = SQLAlchemy(app)
 
 # 会员模型
 class Users(db.Model):
@@ -60,9 +62,24 @@ class Tags(db.Model):
         return '<Tags %r>' % self.name
 
     @classmethod
-    def get_all_tags(cls, page):
+    def get_ten_tags(cls, page):
         # 每页查询10条
         tags = Tags.query.paginate(page=page, per_page=10)
+        return tags
+
+    @classmethod
+    def get_all_tags(cls):
+        # 查询所有标签
+
+        """方法一"""
+        # tags = []
+        # data = Tags.query.all()
+        # for value in data:
+            # tag = (str(value.id), value.name)
+            # tags.append(tag)
+
+        """方法二"""
+        tags = [(str(value.id), value.name) for value in Tags.query.all()]
         return tags
 
 # 电影
@@ -74,8 +91,8 @@ class Movie(db.Model):
     logo = db.Column(db.String(255), unique=True)   # 封面
     info = db.Column(db.Text)   # 简介
     star = db.Column(db.SmallInteger)   # 星级
-    playnum = db.Column(db.BigInteger)  # 播放量
-    commentnum = db.Column(db.BigInteger)   # 评论量
+    playnum = db.Column(db.BigInteger, default=0)  # 播放量
+    commentnum = db.Column(db.BigInteger, default=0)   # 评论量
     tag_id = db.Column(db.Integer, db.ForeignKey('tags.id')) # 所属标签
     area = db.Column(db.String(255))    # 上映地区
     release_time = db.Column(db.Date)   # 上映时间
@@ -86,6 +103,12 @@ class Movie(db.Model):
 
     def __repr__(self):
         return '<Movie %r>' % self.title
+
+    @classmethod
+    def get_ten_movies(cls, page):
+        # 每页查询10条
+        movies = Movie.query.paginate(page=page, per_page=10)
+        return movies
 
 # 上映预告
 class Preview(db.Model):

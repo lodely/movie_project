@@ -3,12 +3,22 @@
 # 视图函数
 
 # 从当前模块中导入蓝图对象
+import os
+
+import datetime
+import uuid
+
+from sqlalchemy import or_
+
 from . import admin
 from flask import render_template, redirect, url_for, flash, session, request
-from app.admin.forms import LoginForm, TagForm, TagEditForm
-from app.models import Admin, Tags
-from app import db
+from app.admin.forms import LoginForm, TagForm, TagEditForm, MovieForm
+from app.models import Admin, Tags, Movie
+# from app import db
+from app.models import db
+from app import app
 from functools import wraps
+from werkzeug.utils import secure_filename
 
 # 定义访问控制装饰器
 def admin_login_req(f):
@@ -18,6 +28,12 @@ def admin_login_req(f):
             return redirect(url_for("admin.login", next=request.url))
         return f(*args, **kwargs)
     return decorated_function
+
+# 修改文件名称
+def change_filename(filename):
+    fileinfo = os.path.split(filename)
+    filename = datetime.datetime.now().strftime("%Y%m%d%H%M%S")+str(uuid.uuid4().hex)+fileinfo[-1]
+    return filename
 
 # 控制面板
 @admin.route("/")
@@ -65,12 +81,12 @@ def tag_add():
         data = form.data
         # 查询是否已经存在该标签
         if Tags.query.filter_by(name=data['name']).first():
-            flash("已经存在该标签！")
+            flash("已经存在该标签！", "err")
         else:
             with db.auto_commit():
                 tag = Tags(name=data['name'])
                 db.session.add(tag)
-            flash("标签添加成功！")
+            flash("标签添加成功！", "ok")
             return redirect(url_for("admin.tag_add"))
     return render_template("admin/tag_add.html", form=form)
 
@@ -80,7 +96,7 @@ def tag_add():
 def tag_list(page=None):
     if page is None:
         page = 1
-    tags = Tags.get_all_tags(page=page)
+    tags = Tags.get_ten_tags(page=page)
     return render_template("admin/tag_list.html", tags=tags)
 
 # 标签删除
@@ -91,7 +107,7 @@ def tag_del(id=None):
     if tag:
         with db.auto_commit():
             db.session.delete(tag)
-        flash("标签删除成功！")
+        flash("标签删除成功！", "ok")
         return redirect(url_for("admin.tag_list", page=1))
     return render_template("admin/tag_list.html")
 
@@ -103,27 +119,83 @@ def tag_edit(id=None):
     tag = Tags.query.filter_by(id=id).first_or_404()
     if form.validate_on_submit():
         data = form.data
+
         if Tags.query.filter_by(name=data['name']).first():
-            flash("标签已经存在！")
+            flash("标签已经存在！", "err")
         else:
             with db.auto_commit():
                 tag.name = data['name']
                 db.session.add(tag)
-            flash("标签修改成功！")
+            flash("标签修改成功！", "ok")
         return redirect(url_for("admin.tag_edit", id=id))
     return render_template("admin/tag_edit.html", form=form)
 
 # 添加电影
-@admin.route("/movie/add")
+@admin.route("/movie/add", methods=['GET', 'POST'])
 @admin_login_req
 def movie_add():
-    return render_template("admin/movie_add.html")
+    form = MovieForm()
+
+    # 查询数据库标签并赋值给表单，此方法可以实时同步数据库的标签数据
+    # 避免新添加的标签无法显示
+    form.tag_id.choices = Tags.get_all_tags()
+    if request.method == "POST":
+        if form.validate_on_submit():
+            data = form.data
+            # 若已经存在则不再添加
+            if Movie.query.filter(or_(Movie.logo==data['logo'], Movie.url==data['url'],Movie.title==data['title'])).all():
+                flash("电影已经存在，请不要重复添加", "err")
+            else:
+                with db.auto_commit():
+                    file_url = secure_filename(form.url.data.filename)
+                    file_logo = secure_filename(form.logo.data.filename)
+                    if not os.path.exists(app.config["UP_DIR"]):
+                        os.makedirs(app.config["UP_DIR"])
+                        os.chmod(app.config["UP_DIR"], "rw")
+
+                    url = change_filename(file_url)
+                    logo = change_filename(file_logo)
+                    form.url.data.save(app.config["UP_DIR"]+url)
+                    form.logo.data.save(app.config["UP_DIR"]+logo)
+                    new_movie = Movie(
+                        title=data['title'],
+                        url=url,
+                        logo=logo,
+                        info=data['info'],
+                        star=int(data['star']),
+                        tag_id=int(data['tag_id']),
+                        area=data['area'],
+                        release_time=data['release_time'],
+                        length=data['length']
+                    )
+                    db.session.add(new_movie)
+                flash("电影添加成功", "ok")
+                return redirect(url_for("admin.movie_add"))
+        else:
+            flash("电影添加失败", 'err')
+            return redirect(url_for("admin.movie_add"))
+    return render_template("admin/movie_add.html", form=form)
 
 # 电影列表
-@admin.route("/movie/list")
+@admin.route("/movie/list<int:page>", methods=['GET', 'POST'])
 @admin_login_req
-def movie_list():
-    return render_template("admin/movie_list.html")
+def movie_list(page=None):
+    if page is None:
+        page = 1
+    movies = Movie.get_ten_movies(page=page)
+    return render_template("admin/movie_list.html", movies=movies)
+
+# 电影删除
+@admin.route("/movie/del/<int:id>", methods=['GET'])
+@admin_login_req
+def movie_del(id=None):
+    movie = Movie.query.filter_by(id=id).first_or_404()
+    if movie:
+        with db.auto_commit():
+            db.session.delete(movie)
+        flash("电影删除成功！", "ok")
+        return redirect(url_for("admin.movie_list", page=1))
+    return render_template("admin/tag_list.html")
 
 # 添加预告
 @admin.route("/preview/add")
