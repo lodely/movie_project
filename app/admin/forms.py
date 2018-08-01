@@ -184,3 +184,96 @@ class MovieForm(FlaskForm):
             "class" : "btn btn-primary"
         }
     )
+
+# 编辑电影
+class EditMovieForm(FlaskForm):
+    title = StringField(
+        "片名",
+        validators=[DataRequired("请输入片名！")],
+        description="片名",
+        render_kw={
+            "class" : "form-control",
+            "id" : "input_title",
+            "placeholder" : "请输入片名！"
+        }
+    )
+
+    logo = FileField(
+        "封面",
+        description="封面",
+        render_kw={
+            "id" : "input_url",
+            "placeholder" : "选择文件"
+        }
+    )
+
+    info = TextAreaField(
+        "介绍",
+        validators=[DataRequired("请输入电影介绍!")],
+        description="介绍",
+        render_kw={
+            "class" : "form-control",
+            "id" : "input_info",
+            "rows" : "10",
+            "placeholder" : "请输入电影简介！"
+        }
+    )
+    star = SelectField(
+        "星级",
+        description="星级",
+        render_kw={
+            "class" : "form-control",
+            "id" : "input_star",
+        },
+        choices=[('1', '1星'),
+                 ('2', '2星'),
+                 ('3', '3星'),
+                 ('4', '4星'),
+                 ('5', '5星')]
+    )
+    tag_id = SelectField(
+        "标签",
+        description="标签",
+        render_kw={
+            "class" : "form-control",
+            "id" : "input_tag_id",
+        },
+        # 获取所有标签
+        choices=[]
+    )
+    area = StringField(
+        "上映地区",
+        validators=[DataRequired("请输入上映地区!")],
+        description="上映地区",
+        render_kw={
+            "class" : "form-control",
+            "id" : "input_area",
+            "placeholder" : "请输入上映地区！"
+        }
+    )
+    release_time = StringField(
+        "上映时间",
+        validators=[DataRequired("请输入上映时间!")],
+        description="上映时间",
+        render_kw={
+            "class" : "form-control",
+            "id" : "input_release_time",
+            "placeholder" : "请输入上映时间！"
+        }
+    )
+    length = StringField(
+        "片长",
+        validators=[DataRequired("请输入片长!")],
+        description="片长",
+        render_kw={
+            "class" : "form-control",
+            "id" : "input_length",
+            "placeholder" : "请输入片长！"
+        }
+    )
+    submit = SubmitField(
+        "提交",
+        render_kw={
+            "class" : "btn btn-primary"
+        }
+    )

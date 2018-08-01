@@ -12,7 +12,7 @@ from sqlalchemy import or_
 
 from . import admin
 from flask import render_template, redirect, url_for, flash, session, request
-from app.admin.forms import LoginForm, TagForm, TagEditForm, MovieForm
+from app.admin.forms import LoginForm, TagForm, TagEditForm, MovieForm, EditMovieForm
 from app.models import Admin, Tags, Movie
 # from app import db
 from app.models import db
@@ -177,13 +177,55 @@ def movie_add():
     return render_template("admin/movie_add.html", form=form)
 
 # 电影列表
-@admin.route("/movie/list<int:page>", methods=['GET', 'POST'])
+@admin.route("/movie/list/<int:page>", methods=['GET', 'POST'])
 @admin_login_req
 def movie_list(page=None):
     if page is None:
         page = 1
     movies = Movie.get_ten_movies(page=page)
     return render_template("admin/movie_list.html", movies=movies)
+
+# 编辑电影
+@admin.route("/movie/edit/<int:id>", methods=['GET', 'POST'])
+@admin_login_req
+def movie_edit(id=None):
+    form = EditMovieForm()
+    # 查询数据库标签并赋值给表单，此方法可以实时同步数据库的标签数据
+    # 避免新添加的标签无法显示
+    form.tag_id.choices = Tags.get_all_tags()
+
+    movie = Movie.query.filter_by(id=id).first()
+
+    if request.method == "POST":
+        if form.validate_on_submit():
+            data = form.data
+
+            with db.auto_commit():
+                file_logo = secure_filename(form.logo.data.filename)
+                if not os.path.exists(app.config["UP_DIR"]):
+                    os.makedirs(app.config["UP_DIR"])
+                    os.chmod(app.config["UP_DIR"], "rw")
+
+                logo = change_filename(file_logo)
+                form.logo.data.save(app.config["UP_DIR"]+logo)
+
+                movie.title = data['title'],
+                movie.logo = logo,
+                movie.info = data['info'],
+                movie.star = int(data['star']),
+                movie.tag_id = int(data['tag_id']),
+                movie.area = data['area'],
+                movie.release_time = data['release_time'],
+                movie.length = data['length']
+
+                db.session.add(movie)
+            flash("电影编辑成功", "ok")
+            return redirect(url_for("admin.movie_edit", id=id))
+        else:
+            flash("电影编辑失败", 'err')
+            return redirect(url_for("admin.movie_edit", id=id))
+
+    return render_template("admin/movie_edit.html", form=form)
 
 # 电影删除
 @admin.route("/movie/del/<int:id>", methods=['GET'])
