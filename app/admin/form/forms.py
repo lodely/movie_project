@@ -45,6 +45,7 @@ class LoginForm(FlaskForm):
             # 抛出异常
             raise ValidationError("账号不存在")
 
+# 重置密码
 class ResetPwdForm(FlaskForm):
     old_pwd = PasswordField(
         "旧密码",
@@ -339,6 +340,108 @@ class PreviewForm(FlaskForm):
             "id" : "input_logo",
             "placeholder" : "选择文件"
         }
+    )
+    submit = SubmitField(
+        "添加",
+        render_kw={
+            "class" : "btn btn-primary"
+        }
+    )
+
+# 添加权限
+class AuthForm(FlaskForm):
+    name = StringField(
+        "权限名称",
+        validators=[DataRequired("请输入权限名称!")],
+        description="权限名称",
+        render_kw={
+            "class" : "form-control",
+            "id" : "input_name",
+            "placeholder" : "请输入权限名称！"
+        }
+    )
+    url = StringField(
+        "权限地址",
+        validators=[DataRequired("请输入权限地址!")],
+        description="权限地址",
+        render_kw={
+            "class" : "form-control",
+            "id" : "input_url",
+            "placeholder" : "请输入权限地址！"
+        }
+    )
+    submit = SubmitField(
+        "添加",
+        render_kw={
+            "class" : "btn btn-primary"
+        }
+    )
+
+# 添加角色
+class RoleForm(FlaskForm):
+    name = StringField(
+        "角色名称",
+        validators=[DataRequired("请输入角色名称!")],
+        description="角色名称",
+        render_kw={
+            "class" : "form-control",
+            "id" : "input_name",
+            "placeholder" : "请输入角色名称！"
+        }
+    )
+
+    submit = SubmitField(
+        "添加",
+        render_kw={
+            "class" : "btn btn-primary"
+        }
+    )
+
+# 添加管理员
+class AdminForm(FlaskForm):
+    name = StringField(
+        "管理员名称",
+        validators=[DataRequired("请输入管理员名称!")],
+        description="管理员名称",
+        render_kw={
+            "class" : "form-control",
+            "id" : "input_name",
+            "placeholder" : "请输入管理员名称！"
+        }
+    )
+    pwd = PasswordField(
+        "管理员密码",
+        validators=[DataRequired("请输入管理员密码！"), Length(6,20,message=u'长度位于6~20之间')],
+        description="管理员密码",
+        render_kw={
+            "type" : "password",
+            "class" : "form-control",
+            "placeholder" : "请输入管理员密码！",
+            "id" : "input_pwd",
+            # "required" : "required"
+        }
+    )
+    re_pwd = PasswordField(
+        "重复管理员密码",
+        validators=[DataRequired("请重复输入管理员密码！"), Length(6,20,message=u'长度位于6~20之间')],
+        description="重复管理员密码",
+        render_kw={
+            "type" : "password",
+            "class" : "form-control",
+            "placeholder" : "请重复输入管理员密码！",
+            "id" : "input_re_pwd",
+            # "required" : "required"
+        }
+    )
+    role = SelectField(
+        "所属角色",
+        description="所属角色",
+        render_kw={
+            "class" : "form-control",
+            "id" : "input_role_id",
+        },
+        # 获取所有角色
+        choices=[]
     )
     submit = SubmitField(
         "添加",
