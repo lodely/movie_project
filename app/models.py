@@ -5,8 +5,10 @@ from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy as _SQLAlchemy
 from contextlib import contextmanager
 from flask import flash
-
 from . import app
+
+from flask_script import Manager # flask脚本
+from flask_migrate import Migrate, MigrateCommand #flask迁移数据
 
 # 提交数据，若出错自动回滚
 class SQLAlchemy(_SQLAlchemy):
@@ -23,6 +25,10 @@ class SQLAlchemy(_SQLAlchemy):
 
 db = SQLAlchemy(app)
 
+migrate = Migrate(app, db) # 传入两个对象，一个是app，另一个是SQLAlchemy对象
+manager = Manager(app)
+manager.add_command('db', MigrateCommand) #给manager添加一个db命令并且传入一个MigrateCommand的类
+
 # 会员模型
 class Users(db.Model):
     __tablename__ = 'users'
@@ -33,14 +39,25 @@ class Users(db.Model):
     email = db.Column(db.String(100), unique=True) # 邮箱
     info = db.Column(db.Text)   # 个性简介
     face = db.Column(db.String(255), unique=True)   # 头像
-    addtime = db.Column(db.DateTime, index=True, default=datetime.now)   #注册时间
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)   # 注册时间
     uuid = db.Column(db.String(255), unique=True)   # 唯一标识符
-    userlogs = db.relationship("UserLog", backref='user')   #会员日志外键关联
-    comments = db.relationship("Comment", backref='user')   #评论外键关联
-    moviecols = db.relationship("Moviecol", backref='user')   #收藏外键关联
+    userlogs = db.relationship("UserLog", backref='user')   # 会员日志外键关联
+    comments = db.relationship("Comment", backref='user')   # 评论外键关联
+    moviecols = db.relationship("Moviecol", backref='user')   # 收藏外键关联
+    status = db.Column(db.SmallInteger, default=1) # 状态为1正常，0冻结
 
     def __repr__(self):
         return '<Users %r>' % self.nickname
+
+    @classmethod
+    def get_all_user(cls):
+        all_users = Users.query.all()
+        return all_users
+
+    @classmethod
+    def get_ten_user(cls, page):
+        users = Users.query.paginate(page=page, per_page=10)
+        return users
 
 # 会员登录日志
 class UserLog(db.Model):

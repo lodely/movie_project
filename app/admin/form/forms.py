@@ -21,7 +21,7 @@ class LoginForm(FlaskForm):
     )
     pwd = PasswordField(
         "密码",
-        validators=[DataRequired("请输入密码！"), Length(10,20,message=u'长度位于6~16之间')],
+        validators=[DataRequired("请输入密码！"), Length(10,20,message=u'长度位于6~20之间')],
         description="密码",
         render_kw={
             "class" : "form-control",
@@ -44,6 +44,47 @@ class LoginForm(FlaskForm):
         if admin == 0:
             # 抛出异常
             raise ValidationError("账号不存在")
+
+class ResetPwdForm(FlaskForm):
+    old_pwd = PasswordField(
+        "旧密码",
+        validators=[DataRequired("请输入旧密码！"), Length(6,20,message=u'长度位于6~20之间')],
+        description="旧密码",
+        render_kw={
+            "type" : "password",
+            "class" : "form-control",
+            "placeholder" : "请输入旧密码！",
+            "id" : "input_pwd",
+            # "required" : "required"
+        }
+    )
+    new_pwd = PasswordField(
+        "新密码",
+        validators=[DataRequired("请输入新密码！"), Length(6,20,message=u'长度位于6~20之间')],
+        description="新密码",
+        render_kw={
+            "type" : "password",
+            "class" : "form-control",
+            "placeholder" : "请输入新密码！",
+            "id" : "input_newpwd",
+            # "required" : "required"
+        }
+    )
+
+    submit = SubmitField(
+        "修改",
+        render_kw={
+            "class" : "btn btn-primary"
+        }
+    )
+
+    def validate_old_pwd(self, field):
+        pwd = field.data
+        admin = Admin.query.filter_by(pwd=pwd).first()
+        if admin:
+            # 旧密码正确
+            return True
+        return False
 
 # 标签添加
 class TagForm(FlaskForm):

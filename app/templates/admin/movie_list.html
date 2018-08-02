@@ -5,7 +5,7 @@
 <section class="content-header">
     <h1>微电影管理系统</h1>
     <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-dashboard"></i> 电影管理</a></li>
+        <li><a href="{{ url_for('admin.movie_list', page=1) }}"><i class="fa fa-dashboard"></i> 电影管理</a></li>
         <li class="active">电影列表</li>
     </ol>
 </section>
@@ -76,7 +76,7 @@
                     </table>
                 </div>
                 <div class="box-footer clearfix">
-                    {{ pg.page(tags, 'admin.tag_list') }}
+                    {{ pg.page(movies, 'admin.movie_list') }}
                 </div>
             </div>
         </div>
