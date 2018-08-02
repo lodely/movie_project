@@ -9,6 +9,8 @@ flask-sqlalchemy = "*"
 cymysql = "*"
 flask-wtf = "*"
 flask-login = "*"
+flask-migrate = "*"
+flask-script = "*"
 
 [dev-packages]
 
