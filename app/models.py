@@ -27,10 +27,10 @@ db = SQLAlchemy(app)
 class Users(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    nickname = db.Column(db.String(100), unique=True)
-    pwd = db.Column(db.String(100))
-    phone = db.Column(db.String(11), unique=True)
-    email = db.Column(db.String(100), unique=True)
+    nickname = db.Column(db.String(100), unique=True) # 昵称
+    pwd = db.Column(db.String(100)) # 密码
+    phone = db.Column(db.String(11), unique=True) # 电话
+    email = db.Column(db.String(100), unique=True) # 邮箱
     info = db.Column(db.Text)   # 个性简介
     face = db.Column(db.String(255), unique=True)   # 头像
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)   #注册时间
