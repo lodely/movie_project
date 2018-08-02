@@ -34,7 +34,7 @@ def tag_add():
 def tag_list(page=None):
     if page is None:
         page = 1
-    tags = Tags.get_ten_tags(page=page)
+    tags = Tags.get_ten_page(page=page)
     return render_template("admin/tag_list.html", tags=tags)
 
 # 标签删除

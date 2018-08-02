@@ -16,7 +16,7 @@ from app.models import Users, db
 def user_list(page=None):
     if page is None:
         page = 1
-    users = Users.get_ten_user(page=page)
+    users = Users.get_ten_page(page=page)
     return render_template("admin/user_list.html", users=users)
 
 # 查看会员

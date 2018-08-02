@@ -29,8 +29,18 @@ migrate = Migrate(app, db) # 传入两个对象，一个是app，另一个是SQL
 manager = Manager(app)
 manager.add_command('db', MigrateCommand) #给manager添加一个db命令并且传入一个MigrateCommand的类
 
+class Base(db.Model):
+    __abstract__ = True
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)   # 登录时间
+
+    @classmethod
+    def get_ten_page(cls, page):
+        datas = cls.query.paginate(page=page, per_page=10)
+        return datas
+
+
 # 会员模型
-class Users(db.Model):
+class Users(Base):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     nickname = db.Column(db.String(100), unique=True) # 昵称
@@ -54,13 +64,10 @@ class Users(db.Model):
         all_users = Users.query.all()
         return all_users
 
-    @classmethod
-    def get_ten_user(cls, page):
-        users = Users.query.paginate(page=page, per_page=10)
-        return users
+
 
 # 会员登录日志
-class UserLog(db.Model):
+class UserLog(Base):
     __tablename__ = 'userlog'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -71,7 +78,7 @@ class UserLog(db.Model):
         return '<UserLog %r>' % self.id
 
 # 标签模型
-class Tags(db.Model):
+class Tags(Base):
     __tablename__ = 'tags'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True)    # 标题
@@ -81,11 +88,6 @@ class Tags(db.Model):
     def __repr__(self):
         return '<Tags %r>' % self.name
 
-    @classmethod
-    def get_ten_tags(cls, page):
-        # 每页查询10条
-        tags = Tags.query.paginate(page=page, per_page=10)
-        return tags
 
     @classmethod
     def get_all_tags(cls):
@@ -103,7 +105,7 @@ class Tags(db.Model):
         return tags
 
 # 电影
-class Movie(db.Model):
+class Movie(Base):
     __tablename__ = 'movie'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), unique=True)  # 电影名
@@ -124,14 +126,9 @@ class Movie(db.Model):
     def __repr__(self):
         return '<Movie %r>' % self.title
 
-    @classmethod
-    def get_ten_movies(cls, page):
-        # 每页查询10条
-        movies = Movie.query.paginate(page=page, per_page=10)
-        return movies
 
 # 上映预告
-class Preview(db.Model):
+class Preview(Base):
     __tablename__ = 'preview'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), unique=True)  # 电影名
@@ -141,14 +138,9 @@ class Preview(db.Model):
     def __repr__(self):
         return '<Preview %r>' % self.title
 
-    @classmethod
-    def get_ten_previews(cls, page):
-        # 每页查询10条
-        previews = Preview.query.paginate(page=page, per_page=10)
-        return previews
 
 # 评论
-class Comment(db.Model):
+class Comment(Base):
     __tablename__ = 'comment'
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text)
@@ -159,14 +151,9 @@ class Comment(db.Model):
     def __repr__(self):
         return '<Comment %r>' % self.id
 
-    @classmethod
-    def get_ten_comments(cls, page):
-        # 每页查询10条
-        comments = Comment.query.paginate(page=page, per_page=10)
-        return comments
 
 # 电影收藏
-class Moviecol(db.Model):
+class Moviecol(Base):
     __tablename__ = 'moviecol'
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text)
@@ -177,14 +164,9 @@ class Moviecol(db.Model):
     def __repr__(self):
         return '<Moviecol %r>' % self.id
 
-    @classmethod
-    def get_ten_moviecols(cls, page):
-        # 每页查询10条
-        moviecols = Moviecol.query.paginate(page=page, per_page=10)
-        return moviecols
 
 # 权限
-class Auth(db.Model):
+class Auth(Base):
     __tablename__ = 'auth'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
@@ -195,18 +177,19 @@ class Auth(db.Model):
         return '<Auth %r>' % self.name
 
 # 角色
-class Role(db.Model):
+class Role(Base):
     __tablename__ = 'role'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
     auths = db.Column(db.String(600))
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)   # 添加时间
+    admin_id = db.relationship("Admin", backref='role') # 管理员外键关联
 
     def __repr__(self):
         return '<Auth %r>' % self.name
 
 # 管理员模型
-class Admin(db.Model):
+class Admin(Base):
     __tablename__ = 'admin'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
@@ -230,10 +213,8 @@ class Admin(db.Model):
         else:
             return False
 
-
-
 # 管理员登录日志模型
-class AdminLog(db.Model):
+class AdminLog(Base):
     __tablename__ = 'adminlog'
     id = db.Column(db.Integer, primary_key=True)
     admin_id = db.Column(db.Integer, db.ForeignKey('admin.id')) # 所属管理员
@@ -244,16 +225,17 @@ class AdminLog(db.Model):
         return '<AdminLog %r>' % self.id
 
 # 管理员操作日志模型
-class OpLog(db.Model):
+class OpLog(Base):
     __tablename__ = 'oplog'
     id = db.Column(db.Integer, primary_key=True)
     admin_id = db.Column(db.Integer, db.ForeignKey('admin.id')) # 所属管理员
     ip = db.Column(db.String(100))
     reason = db.Column(db.String(600)) # 操作原因
-    addtime = db.Column(db.DateTime, index=True, default=datetime.now)   # 登录时间
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)   # 操作时间
 
     def __repr__(self):
         return '<OpLog %r>' % self.id
+
 
 # if __name__ == "__main__":
 #     # db.drop_all()

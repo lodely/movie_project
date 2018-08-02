@@ -68,7 +68,7 @@ def movie_add():
 def movie_list(page=0):
     if not page:
         page = 1
-    movies = Movie.get_ten_movies(page=page)
+    movies = Movie.get_ten_page(page=page)
     return render_template("admin/movie_list.html", movies=movies)
 
 # 编辑电影

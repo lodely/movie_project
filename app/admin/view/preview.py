@@ -46,7 +46,7 @@ def preview_add():
 def preview_list(page=0):
     if not page:
         page=1
-    previews = Preview.get_ten_previews(page=page)
+    previews = Preview.get_ten_page(page=page)
     return render_template("admin/preview_list.html", previews=previews)
 
 # 预告删除

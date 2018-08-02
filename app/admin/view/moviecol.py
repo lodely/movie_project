@@ -17,7 +17,7 @@ from app.models import Moviecol, db
 def moviecol_list(page=0):
     if not page:
         page = 1
-    moviecols = Moviecol.get_ten_moviecols(page=page)
+    moviecols = Moviecol.get_ten_page(page=page)
     return render_template("admin/moviecol_list.html", moviecols=moviecols)
 
 # 收藏编辑

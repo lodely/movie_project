@@ -16,7 +16,7 @@ from app.models import Comment, db
 def comment_list(page=0):
     if not page:
         page = 1
-    comments = Comment.get_ten_comments(page=page)
+    comments = Comment.get_ten_page(page=page)
     return render_template("admin/comment_list.html", comments=comments)
 
 # 评论删除
