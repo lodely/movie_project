@@ -2,8 +2,6 @@
 # -*- coding: UTF-8 -*-
 # 视图函数
 
-# 从当前模块中导入蓝图对象
-import os
 
 from flask import render_template, redirect, url_for, flash, session, request
 
@@ -21,3 +19,9 @@ def user_list():
 @admin_login_req
 def userloginlog_list():
     return render_template("admin/userloginlog_list.html")
+
+# 会员列表
+@admin.route("/user/view")
+@admin_login_req
+def user_view():
+    return render_template("admin/user_view.html")
