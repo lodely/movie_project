@@ -43,8 +43,8 @@ def preview_add():
 # 预告列表
 @admin.route("/preview/list/<int:page>", methods=['GET', 'POST'])
 @admin_login_req
-def preview_list(page=None):
-    if page is None:
+def preview_list(page=0):
+    if not page:
         page=1
     previews = Preview.get_ten_previews(page=page)
     return render_template("admin/preview_list.html", previews=previews)

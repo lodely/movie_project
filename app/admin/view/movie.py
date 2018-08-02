@@ -65,8 +65,8 @@ def movie_add():
 # 电影列表
 @admin.route("/movie/list/<int:page>", methods=['GET', 'POST'])
 @admin_login_req
-def movie_list(page=None):
-    if page is None:
+def movie_list(page=0):
+    if not page:
         page = 1
     movies = Movie.get_ten_movies(page=page)
     return render_template("admin/movie_list.html", movies=movies)
@@ -123,4 +123,4 @@ def movie_del(id=None):
             db.session.delete(movie)
         # flash("电影删除成功！", "ok")
         return redirect(url_for("admin.movie_list", page=1))
-    return render_template("admin/tag_list.html")
+    return render_template("admin/movie_list.html")

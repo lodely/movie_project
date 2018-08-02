@@ -159,6 +159,12 @@ class Comment(db.Model):
     def __repr__(self):
         return '<Comment %r>' % self.id
 
+    @classmethod
+    def get_ten_comments(cls, page):
+        # 每页查询10条
+        comments = Comment.query.paginate(page=page, per_page=10)
+        return comments
+
 # 电影收藏
 class Moviecol(db.Model):
     __tablename__ = 'moviecol'
@@ -170,6 +176,12 @@ class Moviecol(db.Model):
 
     def __repr__(self):
         return '<Moviecol %r>' % self.id
+
+    @classmethod
+    def get_ten_moviecols(cls, page):
+        # 每页查询10条
+        moviecols = Moviecol.query.paginate(page=page, per_page=10)
+        return moviecols
 
 # 权限
 class Auth(db.Model):
