@@ -13,7 +13,7 @@
         {% if v == data.page %}
         <li class="active"><a href="#">{{ v }}</a></li>
         {% else %}
-        <li ><a href="{{ url_for('admin.tag_list', page=v) }}">{{ v }}</a></li>
+        <li ><a href="{{ url_for(url, page=v) }}">{{ v }}</a></li>
         {% endif %}
     {% endfor %}
 
