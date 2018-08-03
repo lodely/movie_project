@@ -188,6 +188,11 @@ class Role(Base):
     def __repr__(self):
         return '<Auth %r>' % self.name
 
+    @classmethod
+    def get_all_roles(cls):
+        roles = [(str(value.id), value.name) for value in cls.query.all()]
+        return roles
+
 # 管理员模型
 class Admin(Base):
     __tablename__ = 'admin'
@@ -203,15 +208,27 @@ class Admin(Base):
     def __repr__(self):
         return '<Admin %r>' % self.name
 
+    # 验证密码
     def check_pwd(self, pwd):
-    #     # 验证密码
-    #     from werkzeug.security import check_password_hash
-    #     # 相同返回True，不同返回False
-    #     return check_password_hash(self.pwd, pwd)
-        if self.pwd == pwd:
-            return True
-        else:
-            return False
+        # 验证密码
+        from werkzeug.security import check_password_hash
+        # 相同返回True，不同返回False
+        return check_password_hash(self.pwd, pwd)
+    #     if self.pwd == pwd:
+    #         return True
+    #     else:
+    #         return False
+
+    @property
+    def password(self):
+        return self.pwd
+
+    # 密码加密
+    @password.setter
+    def password(self, pwd):
+        from werkzeug.security import generate_password_hash
+        self.pwd = generate_password_hash(pwd)
+
 
 # 管理员登录日志模型
 class AdminLog(Base):
