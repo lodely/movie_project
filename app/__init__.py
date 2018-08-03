@@ -4,7 +4,7 @@
 from flask import Flask, render_template
 import os
 # from app.models import db
-
+from flask_login import LoginManager
 
 
 app = Flask(__name__)
@@ -20,6 +20,12 @@ app.config["UP_DIR"] = os.path.join(os.path.abspath(os.path.dirname(__file__)), 
 """使用该方法导入app只能在视图函数中使用数据库模型"""
 # db.init_app(app)
 # db.create_all(app=app)
+
+# 保持登录状态
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'home.login'
+login_manager.login_message = '请先登录或注册'
 
 from app.admin import admin as admin_blueprint
 from app.home import home as home_blueprint

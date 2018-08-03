@@ -9,6 +9,8 @@ from . import app
 
 from flask_script import Manager # flask脚本
 from flask_migrate import Migrate, MigrateCommand #flask迁移数据
+from app import login_manager
+from flask_login import UserMixin
 
 # 提交数据，若出错自动回滚
 class SQLAlchemy(_SQLAlchemy):
@@ -40,7 +42,7 @@ class Base(db.Model):
 
 
 # 会员模型
-class Users(Base):
+class Users(Base, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     nickname = db.Column(db.String(100), unique=True) # 昵称
@@ -64,6 +66,23 @@ class Users(Base):
         all_users = Users.query.all()
         return all_users
 
+    # 验证密码
+    def check_pwd(self, pwd):
+        # 验证密码
+        from werkzeug.security import check_password_hash
+        # 相同返回True，不同返回False
+        return check_password_hash(self.pwd, pwd)
+
+    @property
+    def password(self):
+        return self.pwd
+
+    # 密码加密
+    @password.setter
+    def password(self, pwd):
+        from werkzeug.security import generate_password_hash
+        self.pwd = generate_password_hash(pwd)
+
 
 
 # 会员登录日志
@@ -76,6 +95,12 @@ class UserLog(Base):
 
     def __repr__(self):
         return '<UserLog %r>' % self.id
+
+    @classmethod
+    def get_log(cls, uid):
+        # 查询用户最后登录的十次时间
+        datas = cls.query.filter_by(user_id=uid).order_by(cls.addtime.desc()).limit(10).all()
+        return datas
 
 # 标签模型
 class Tags(Base):
@@ -252,6 +277,11 @@ class OpLog(Base):
 
     def __repr__(self):
         return '<OpLog %r>' % self.id
+
+# 必须要定义该函数传入用户id，以便重载时调用
+@login_manager.user_loader
+def get_user(uid):
+    return Users.query.get(int(uid))
 
 
 # if __name__ == "__main__":
