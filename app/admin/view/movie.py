@@ -5,14 +5,14 @@
 # 从当前模块中导入蓝图对象
 import os
 
-from flask import render_template, redirect, url_for, flash, request
+from flask import render_template, redirect, url_for, flash, request, session
 from sqlalchemy import or_
 from werkzeug.utils import secure_filename
 
 from app import app
 from app.admin.base import admin_login_req, change_filename
 from app.admin.form.forms import MovieForm, EditMovieForm
-from app.models import Tags, Movie, db
+from app.models import Tags, Movie, db, OpLog
 
 from app.admin import admin
 
@@ -29,7 +29,7 @@ def movie_add():
         if form.validate_on_submit():
             data = form.data
             # 若已经存在则不再添加
-            if Movie.query.filter(or_(Movie.logo==data['logo'], Movie.url==data['url'],Movie.title==data['title'])).all():
+            if Movie.query.filter(or_(Movie.logo==data['logo'], Movie.url==data['url'], Movie.title==data['title'])).all():
                 flash("电影已经存在，请不要重复添加", "err")
             else:
                 with db.auto_commit():
@@ -55,6 +55,13 @@ def movie_add():
                         length=data['length']
                     )
                     db.session.add(new_movie)
+
+                    # 记录电影添加操作
+                    new_adminlog = OpLog(
+                            admin_id=session['id'],
+                            ip=session['login_ip'],
+                            reason="添加电影: 《"+new_movie.title+"》")
+                    db.session.add(new_adminlog)
                 flash("电影添加成功", "ok")
                 return redirect(url_for("admin.movie_add"))
         else:
@@ -105,6 +112,13 @@ def movie_edit(id=None):
                 movie.length = data['length']
 
                 db.session.add(movie)
+
+                # 记录编辑电影操作
+                new_adminlog = OpLog(
+                        admin_id=session['id'],
+                        ip=session['login_ip'],
+                        reason="编辑电影: 《"+data['title']+"》")
+                db.session.add(new_adminlog)
             flash("电影编辑成功", "ok")
             return redirect(url_for("admin.movie_edit", id=id))
         else:
@@ -121,6 +135,13 @@ def movie_del(id=None):
     if movie:
         with db.auto_commit():
             db.session.delete(movie)
+
+            # 记录编辑电影操作
+            new_adminlog = OpLog(
+                    admin_id=session['id'],
+                    ip=session['login_ip'],
+                    reason="编辑电影: 《"+movie.title+"》")
+            db.session.add(new_adminlog)
         # flash("电影删除成功！", "ok")
         return redirect(url_for("admin.movie_list", page=1))
     return render_template("admin/movie_list.html")

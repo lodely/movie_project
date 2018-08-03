@@ -3,7 +3,7 @@
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, TextAreaField, FileField, SelectField, DateField
-from wtforms.validators import DataRequired, ValidationError, Length
+from wtforms.validators import DataRequired, ValidationError, Length, EqualTo
 
 from app.models import Admin
 
@@ -21,7 +21,7 @@ class LoginForm(FlaskForm):
     )
     pwd = PasswordField(
         "密码",
-        validators=[DataRequired("请输入密码！"), Length(10,20,message=u'长度位于6~20之间')],
+        validators=[DataRequired("请输入密码！"), Length(6,20,message=u'长度位于6~20之间')],
         description="密码",
         render_kw={
             "class" : "form-control",
@@ -411,7 +411,11 @@ class AdminForm(FlaskForm):
     )
     pwd = PasswordField(
         "管理员密码",
-        validators=[DataRequired("请输入管理员密码！"), Length(6,20,message=u'长度位于6~20之间')],
+        validators=[
+            DataRequired("请输入管理员密码！"),
+            Length(6, 20, message=u'长度位于6~20之间'),
+            EqualTo('re_pwd', message=u'两次输入的密码不一致')
+        ],
         description="管理员密码",
         render_kw={
             "type" : "password",
@@ -423,7 +427,8 @@ class AdminForm(FlaskForm):
     )
     re_pwd = PasswordField(
         "重复管理员密码",
-        validators=[DataRequired("请重复输入管理员密码！"), Length(6,20,message=u'长度位于6~20之间')],
+        validators=[DataRequired("请重复输入管理员密码！"),
+                    Length(6, 20, message=u'长度位于6~20之间')],
         description="重复管理员密码",
         render_kw={
             "type" : "password",
@@ -433,7 +438,7 @@ class AdminForm(FlaskForm):
             # "required" : "required"
         }
     )
-    role = SelectField(
+    role_id = SelectField(
         "所属角色",
         description="所属角色",
         render_kw={

@@ -7,7 +7,7 @@ from flask import render_template, redirect, url_for, flash, session, request
 
 from app.admin.base import admin_login_req
 from app.admin import admin
-from app.models import Comment, db
+from app.models import Comment, db, OpLog
 
 
 # 评论列表
@@ -27,5 +27,12 @@ def comment_del(id=None):
     if comment:
         with db.auto_commit():
             db.session.delete(comment)
+
+            # 记录删除评论操作
+            new_adminlog = OpLog(
+                    admin_id=session['id'],
+                    ip=session['login_ip'],
+                    reason="删除评论--"+comment.user.nickname+" 关于《"+comment.movie.title+"》的评论: "+comment.content)
+            db.session.add(new_adminlog)
         return redirect(url_for("admin.comment_list", page=1))
     return render_template("admin/comment_list.html")

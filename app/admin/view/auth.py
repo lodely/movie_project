@@ -8,7 +8,7 @@ from sqlalchemy import or_
 
 from app.admin.base import admin_login_req
 from app.admin import admin
-from app.models import Auth, db
+from app.models import Auth, db, OpLog
 from app.admin.form.forms import AuthForm
 
 # 添加权限
@@ -28,6 +28,13 @@ def auth_add():
         )
         with db.auto_commit():
             db.session.add(new_auth)
+
+            # 记录添加权限操作
+            new_adminlog = OpLog(
+                    admin_id=session['id'],
+                    ip=session['login_ip'],
+                    reason="添加权限: "+new_auth.name)
+            db.session.add(new_adminlog)
         return redirect(url_for('admin.auth_add'))
     return render_template("admin/auth_add.html", form=form)
 
@@ -42,6 +49,13 @@ def auth_edit(id=None):
         with db.auto_commit():
             auth.name = data['name']
             auth.url = data['url']
+
+            # 记录编辑权限操作
+            new_adminlog = OpLog(
+                    admin_id=session['id'],
+                    ip=session['login_ip'],
+                    reason="编辑权限: "+auth.name)
+            db.session.add(new_adminlog)
         return redirect(url_for('admin.auth_edit', id=id))
     form.name.data = auth.name
     form.url.data = auth.url
@@ -64,5 +78,12 @@ def auth_del(id=None):
     if auth:
         with db.auto_commit():
             db.session.delete(auth)
+
+            # 记录删除权限操作
+            new_adminlog = OpLog(
+                    admin_id=session['id'],
+                    ip=session['login_ip'],
+                    reason="删除权限: "+auth.name)
+            db.session.add(new_adminlog)
         return redirect(url_for('admin.auth_list', page=1))
     return render_template("admin/auth_list.html")

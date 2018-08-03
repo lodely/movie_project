@@ -4,13 +4,13 @@
 
 import os
 
-from flask import render_template, redirect, url_for, flash
+from flask import render_template, redirect, url_for, flash, session
 from werkzeug.utils import secure_filename
 
 from app import app
 from app.admin.base import admin_login_req, change_filename
 from app.admin.form.forms import PreviewForm
-from app.models import Preview, db
+from app.models import Preview, db, OpLog
 from app.admin import admin
 
 # 添加预告
@@ -37,6 +37,12 @@ def preview_add():
                     logo=logo
                 )
                 db.session.add(new_preview)
+                # 记录添加预告操作
+                new_adminlog = OpLog(
+                        admin_id=session['id'],
+                        ip=session['login_ip'],
+                        reason="添加预告: "+new_preview.title)
+                db.session.add(new_adminlog)
         return redirect(url_for("admin.preview_add"))
     return render_template("admin/preview_add.html", form=form)
 
@@ -49,7 +55,7 @@ def preview_list(page=0):
     previews = Preview.get_ten_page(page=page)
     return render_template("admin/preview_list.html", previews=previews)
 
-# 预告删除
+# 删除预告
 @admin.route("/preview/del/<int:id>", methods=['GET'])
 @admin_login_req
 def preview_del(id=None):
@@ -57,6 +63,12 @@ def preview_del(id=None):
     if preview:
         with db.auto_commit():
             db.session.delete(preview)
+            # 记录删除预告操作
+            new_adminlog = OpLog(
+                    admin_id=session['id'],
+                    ip=session['login_ip'],
+                    reason="删除预告: "+preview.title)
+            db.session.add(new_adminlog)
         return redirect(url_for('admin.preview_list', page=1))
     return render_template("admin/preview_list.html")
 
@@ -78,10 +90,15 @@ def preview_edit(id=None):
             logo = change_filename(file_logo)
             # 保存logo图片
             form.logo.data.save(app.config["UP_DIR"]+logo)
-
             preview.title=data['title'],
             preview.logo=logo
-
             db.session.add(preview)
+
+            # 记录编辑预告操作
+            new_adminlog = OpLog(
+                    admin_id=session['id'],
+                    ip=session['login_ip'],
+                    reason="编辑预告: "+data['title'])
+            db.session.add(new_adminlog)
         return redirect(url_for("admin.preview_add"))
     return render_template("admin/preview_add.html", form=form)
