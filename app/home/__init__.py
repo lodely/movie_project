@@ -6,6 +6,6 @@ from flask import Blueprint
 # 创建蓝图对象
 home = Blueprint("home", __name__)
 
-import app.home.index
-import app.home.login
-import app.home.user
+import app.home.view.index
+import app.home.view.login
+import app.home.view.user

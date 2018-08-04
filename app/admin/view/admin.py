@@ -18,7 +18,7 @@ def admin_add():
     form.role_id.choices = Role.get_all_roles()
     if form.validate_on_submit():
         data = form.data
-        # temp = Admin.query.filter(Admin.name.ilike(data['name'])).first()
+        # temp = Admin.query.filter(Admin.name == data['name']).first()
         if Admin.query.filter(Admin.name == data['name']).first():
             flash('已有该管理员', 'err')
             return redirect(url_for('admin.admin_add'))
