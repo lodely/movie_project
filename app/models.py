@@ -4,16 +4,18 @@ from datetime import datetime
 
 from flask_sqlalchemy import SQLAlchemy as _SQLAlchemy
 from contextlib import contextmanager
-from flask import flash
-from . import app
+from flask import flash, Flask
+from app import app
+
 
 from flask_script import Manager # flask脚本
 from flask_migrate import Migrate, MigrateCommand #flask迁移数据
-from app import login_manager
+
 from flask_login import UserMixin
 
 # 提交数据，若出错自动回滚
 class SQLAlchemy(_SQLAlchemy):
+
     @contextmanager
     def auto_commit(self):
         try:
@@ -25,6 +27,9 @@ class SQLAlchemy(_SQLAlchemy):
             flash("数据库保存", "err")
             raise e
 
+# app = Flask(__name__)
+# app.config["SQLALCHEMY_DATABASE_URI"] = 'mysql+cymysql://root:root@localhost:3306/movie_project'
+# app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
 migrate = Migrate(app, db) # 传入两个对象，一个是app，另一个是SQLAlchemy对象
@@ -45,10 +50,10 @@ class Base(db.Model):
 class Users(Base, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    nickname = db.Column(db.String(100), unique=True) # 昵称
+    nickname = db.Column(db.String(100, collation='utf8_bin'), unique=True) # 昵称
     pwd = db.Column(db.String(100)) # 密码
     phone = db.Column(db.String(11), unique=True) # 电话
-    email = db.Column(db.String(100), unique=True) # 邮箱
+    email = db.Column(db.String(100, collation='utf8_bin'), unique=True) # 邮箱
     info = db.Column(db.Text)   # 个性简介
     face = db.Column(db.String(255), unique=True)   # 头像
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)   # 注册时间
@@ -176,6 +181,11 @@ class Comment(Base):
     def __repr__(self):
         return '<Comment %r>' % self.id
 
+    @classmethod
+    def get_ten_commets(cls, page, uid):
+        datas = cls.query.filter_by(user_id=uid).paginate(page=page, per_page=10)
+        return datas
+
 
 # 电影收藏
 class Moviecol(Base):
@@ -188,6 +198,11 @@ class Moviecol(Base):
 
     def __repr__(self):
         return '<Moviecol %r>' % self.id
+
+    @classmethod
+    def get_ten_moviecols(cls, page, uid):
+        datas = cls.query.filter_by(user_id=uid).paginate(page=page, per_page=10)
+        return datas
 
 
 # 权限
@@ -222,7 +237,8 @@ class Role(Base):
 class Admin(Base):
     __tablename__ = 'admin'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True)
+    # 添加collation='utf8_bin'，该字段大小写敏感
+    name = db.Column(db.String(100, collation='utf8_bin'), unique=True)
     pwd = db.Column(db.String(100))
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)   # 添加时间
     is_super = db.Column(db.SmallInteger) # 是否是超级管理员， 0为超级管理员
@@ -278,6 +294,7 @@ class OpLog(Base):
     def __repr__(self):
         return '<OpLog %r>' % self.id
 
+from app import login_manager
 # 必须要定义该函数传入用户id，以便重载时调用
 @login_manager.user_loader
 def get_user(uid):
@@ -286,7 +303,10 @@ def get_user(uid):
 
 # if __name__ == "__main__":
 #     # db.drop_all()
-#     # db.create_all()
-#     admin = Admin(name='admin', pwd="adminadmin", is_super=0, role_id=1)
-#     db.session.add(admin)
+#     db.create_all()
+#     from werkzeug.security import generate_password_hash
+#     pwd = generate_password_hash("adminadmin")
+#     role = Role(name='ROLE')
+#     admin = Admin(name='admin', pwd=pwd, is_super=0, role_id=1)
+#     db.session.add_all([admin, role])
 #     db.session.commit()

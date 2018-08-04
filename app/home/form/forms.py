@@ -209,3 +209,35 @@ class MemberCentreForm(FlaskForm):
         if Users.query.filter_by(phone=phone).first():
             # 抛出异常
             raise ValidationError("该手机号已被注册")
+
+# 修改密码
+class ResetPwdForm(FlaskForm):
+    # 用户修改密码
+    oldpwd = PasswordField(
+        "旧密码",
+        validators=[DataRequired("请输入旧密码！"),
+                    Length(6, 20, message=u'长度位于6~20之间')],
+        description="旧密码",
+        render_kw={
+            "id" : "input_oldpwd",
+            "class" : "form-control",
+            "placeholder" : "请输入旧密码",
+        }
+    )
+    newpwd = PasswordField(
+        "新密码",
+        validators=[DataRequired("请重复输入新密码！"),
+                    Length(6, 20, message=u'长度位于6~20之间')],
+        description="新密码",
+        render_kw={
+            "id" : "input_newpwd",
+            "class" : "form-control",
+            "placeholder" : "新密码",
+        }
+    )
+    submit = SubmitField(
+        "修改密码",
+        render_kw={
+            "class" : "btn btn-success glyphicon glyphicon-edit"
+        }
+    )
