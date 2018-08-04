@@ -5,7 +5,7 @@
 # 从当前模块中导入蓝图对象
 from sqlalchemy import or_
 
-from . import home
+from app.home import home
 from flask import render_template, redirect, url_for, flash, request
 from app.home.form.forms import LoginForm, RegisterForm
 from app.models import Users, db, UserLog

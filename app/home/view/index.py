@@ -3,7 +3,7 @@
 # 视图函数
 
 # 从当前模块中导入蓝图对象
-from . import home
+from app.home import home
 from flask import render_template, redirect, url_for
 
 # 主页
@@ -15,11 +15,6 @@ def index():
 @home.route("/animation")
 def animation():
     return render_template("home/animation.html")
-
-# 收藏电影
-@home.route("/moviecol")
-def moviecol():
-    return render_template("home/moviecol.html")
 
 # 搜索电影
 @home.route("/search")

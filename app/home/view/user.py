@@ -3,7 +3,7 @@
 # 视图函数
 
 # 从当前模块中导入蓝图对象
-from . import home
+from app.home import home
 from flask import render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
 from app.home.form.forms import MemberCentreForm
