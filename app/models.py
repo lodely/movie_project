@@ -311,7 +311,7 @@ class SpiderMovie(Base):
     subtitle = db.Column(db.String(30))     # 字幕
     dbScore = db.Column(db.String(50))  # 豆瓣评分
     length = db.Column(db.String(100))  # 播放时间
-    director = db.Column(db.String(30)) # 导演
+    director = db.Column(db.String(100)) # 导演
     star = db.Column(db.String(1000))   # 主演
     info = db.Column(db.Text)   # 简介
     magneticLink = db.Column(db.String(500))    # 磁力链接
