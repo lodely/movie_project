@@ -175,6 +175,7 @@ class Comment(Base):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text)
     movie_id = db.Column(db.Integer, db.ForeignKey('movie.id')) # 所属电影
+    spidermovie_id = db.Column(db.Integer, db.ForeignKey('spidermovie.id')) # 所属电影
     user_id = db.Column(db.Integer, db.ForeignKey('users.id')) # 所属会员
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)   # 添加时间
 
@@ -193,6 +194,7 @@ class Moviecol(Base):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text)
     movie_id = db.Column(db.Integer, db.ForeignKey('movie.id')) # 所属电影
+    spidermovie_id = db.Column(db.Integer, db.ForeignKey('spidermovie.id')) # 所属电影
     user_id = db.Column(db.Integer, db.ForeignKey('users.id')) # 所属会员
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)   # 添加时间
 
@@ -294,6 +296,40 @@ class OpLog(Base):
     def __repr__(self):
         return '<OpLog %r>' % self.id
 
+# 抓取到的电影
+class SpiderMovie(Base):
+    __tablename__ = 'spidermovie'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100)) # 词条名
+    translateName = db.Column(db.String(100))   # 译名
+    title = db.Column(db.String(100), unique=True)  # 电影名
+    imgUrl = db.Column(db.String(255))  # 图片地址
+    time = db.Column(db.String(30))   # 上映时间
+    place = db.Column(db.String(30))    # 上映地区
+    category = db.Column(db.String(30))    # 分类
+    language = db.Column(db.String(30))     #语言
+    subtitle = db.Column(db.String(30))     # 字幕
+    dbScore = db.Column(db.String(50))  # 豆瓣评分
+    length = db.Column(db.String(100))  # 播放时间
+    director = db.Column(db.String(30)) # 导演
+    star = db.Column(db.String(1000))   # 主演
+    info = db.Column(db.Text)   # 简介
+    magneticLink = db.Column(db.String(500))    # 磁力链接
+    downloadUrl = db.Column(db.String(500))     # 下载链接
+    commentnum = db.Column(db.BigInteger, default=0)   # 评论量
+    tag_id = db.Column(db.Integer, db.ForeignKey('tags.id')) # 所属标签
+    comments = db.relationship("Comment", backref='spidermovie')  # 评论外键关联
+    moviecols = db.relationship("Moviecol", backref='spidermovie')   #收藏外键关联
+
+    def __repr__(self):
+        return '<Movie %r>' % self.title
+
+    @classmethod
+    def get_spidermovie(cls, page):
+        datas = cls.query.paginate(page=page, per_page=12)
+        return datas
+
+
 from app import login_manager
 # 必须要定义该函数传入用户id，以便重载时调用
 @login_manager.user_loader
@@ -302,11 +338,11 @@ def get_user(uid):
 
 
 # if __name__ == "__main__":
-#     # db.drop_all()
-#     db.create_all()
-#     from werkzeug.security import generate_password_hash
-#     pwd = generate_password_hash("adminadmin")
-#     role = Role(name='ROLE')
-#     admin = Admin(name='admin', pwd=pwd, is_super=0, role_id=1)
-#     db.session.add_all([admin, role])
-#     db.session.commit()
+    # db.drop_all()
+    # db.create_all()
+    # from werkzeug.security import generate_password_hash
+    # pwd = generate_password_hash("adminadmin")
+    # role = Role(name='ROLE')
+    # admin = Admin(name='admin', pwd=pwd, is_super=0, role_id=1)
+    # db.session.add_all([admin, role])
+    # db.session.commit()
