@@ -241,3 +241,23 @@ class ResetPwdForm(FlaskForm):
             "class" : "btn btn-success glyphicon glyphicon-edit"
         }
     )
+
+# 搜索
+class SearchForm(FlaskForm):
+    movie = StringField(
+        "请输入电影名！",
+        validators=[DataRequired("请输入电影名!")],
+        description="请输入电影名",
+        render_kw={
+            "id" : "input_name",
+            "type" : "text",
+            "class" : "form-control",
+            "placeholder" : "请输入电影名",
+        }
+    )
+    submit = SubmitField(
+        "搜索",
+        render_kw={
+            "class" : "btn btn-default"
+        }
+    )
