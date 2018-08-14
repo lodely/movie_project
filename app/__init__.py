@@ -14,6 +14,9 @@ app.debug = True
 app.config["SQLALCHEMY_DATABASE_URI"] = 'mysql+cymysql://root:root@localhost:3306/movie_project'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+# 打印原始sql语句
+# app.config["SQLALCHEMY_ECHO"] = True
+
 app.config["SECRET_KEY"] = '205YWHhaG0ASHGghaoghaQA0TGAHLHG'
 app.config["UP_DIR"] = os.path.join(os.path.abspath(os.path.dirname(__file__)), "static/uploads/")
 
