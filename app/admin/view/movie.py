@@ -62,7 +62,7 @@ def movie_add():
                             ip=session['login_ip'],
                             reason="添加电影: 《"+new_movie.title+"》")
                     db.session.add(new_adminlog)
-                flash("电影添加成功", "ok")
+                flash("电影添加成功", "addok")
                 return redirect(url_for("admin.movie_add"))
         else:
             flash("电影添加失败", 'err')
